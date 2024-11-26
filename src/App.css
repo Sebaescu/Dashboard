@@ -1,42 +1,111 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: #333333;
+  font-family: 'Roboto', sans-serif;
+}
+
+.weather-app {
+  font-family: 'Roboto', sans-serif;
+  background-color: #ffffff;
+  color: #333333;
   padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+  min-height: 100vh; 
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; 
+  align-items: center; 
 }
 
 .card {
-  padding: 2em;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
 }
 
-.read-the-docs {
-  color: #888;
+.responsive-map {
+  width: 100%; 
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+@media screen and (min-width: 769px) {
+  .responsive-map {
+    width: 800px;
+    height: 400px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .responsive-map {
+    width: 500px;
+  }
+}
+
+.current-weather {
+  text-align: center;
+}
+
+.current-weather .temperature {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #FF7C00;
+}
+
+.current-weather .description {
+  font-size: 1.2rem;
+  color: #777777;
+  margin-top: 0.5rem;
+}
+
+.current-weather .weather-details {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555555;
+}
+
+.hourly-forecast h6 {
+  color: #FF7C00;
+}
+
+.daily-forecast table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.daily-forecast td {
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.daily-forecast img {
+  width: 50px;
+  height: 50px;
+}
+
+.daily-forecast td {
+  border-bottom: 1px solid #FF7C00;
+}
+
+.daily-forecast tr:hover {
+  background-color: #FF7C00;
+  color: #ffffff;
+}
+
+@media screen and (max-width: 768px) {
+  .current-weather .temperature {
+    font-size: 2.5rem;
+  }
+
+  .daily-forecast img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .daily-forecast td {
+    font-size: 0.8rem;
+  }
 }
