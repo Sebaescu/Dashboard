@@ -1,198 +1,185 @@
-import React, { useEffect, useState } from 'react';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { Line } from 'react-chartjs-2';
 import './App.css';
+import Grid from '@mui/material/Grid'; 
+import IndicatorWeather from './components/IndicatorWeather';
+import TableWeather from './components/TableWeather';
+import ControlWeather from './components/controlWeather'; 
+import LineChartWeather from './components/LineChartWeather';
+import Item from './components/item'; 
+import { useEffect, useState } from 'react';
 
-import { WeatherData } from './interfaces/WeatherData';
+interface Indicator {
+  title?: string;
+  subtitle?: string;
+  value?: string;
+  icon?: string | JSX.Element;
+  temp?: string;
+}
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-const App: React.FC = () => {
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
-  const API_URL = `https://api.openweathermap.org/data/2.5/forecast?q=Guayaquil&units=metric&appid=${API_KEY}`;
+function App() {
+  const [indicators, setIndicators] = useState<Indicator[]>([]);
+  const [owm, setOWM] = useState(localStorage.getItem("openWeatherMap"));
+  const [items, setItems] = useState<Item[]>([]);
+  const [selectedVariable, setSelectedVariable] = useState('precipitation'); 
 
   useEffect(() => {
-    fetch(API_URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    const request = async () => {
+      let savedTextXML = localStorage.getItem("openWeatherMap") || "";
+      const expiringTime = localStorage.getItem("expiringTime");
+      const nowTime = (new Date()).getTime();
+
+      if (expiringTime === null || nowTime > parseInt(expiringTime)) {
+        const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/forecast?q=Guayaquil&mode=xml&appid=${apiKey}`
+        );
+        savedTextXML = await response.text();
+
+        const hours = 0.01; 
+        const delay = hours * 3600000;
+        const newExpiringTime = nowTime + delay;
+
+        localStorage.setItem("openWeatherMap", savedTextXML);
+        localStorage.setItem("expiringTime", newExpiringTime.toString());
+        localStorage.setItem("nowTime", nowTime.toString());
+        localStorage.setItem(
+          "expiringDateTime",
+          new Date(newExpiringTime).toString()
+        );
+        localStorage.setItem("nowDateTime", new Date(nowTime).toString());
+
+        setOWM(savedTextXML);
+      }
+
+      if (savedTextXML) {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(savedTextXML, "application/xml");
+
+        const dataToIndicators: Indicator[] = [];
+        const dataToItems: Item[] = [];
+        const times = xml.getElementsByTagName("time");
+        for (let i = 0; i < Math.min(6, times.length); i++) {
+          const time = times[i];
+          const dateStart = time.getAttribute("from") || "";
+          const dateEnd = time.getAttribute("to") || "";
+          const precipitation = time.getElementsByTagName("precipitation")[0]?.getAttribute("probability") || "0";
+          const humidity = time.getElementsByTagName("humidity")[0]?.getAttribute("value") || "0";
+          const clouds = time.getElementsByTagName("clouds")[0]?.getAttribute("all") || "0";
+        
+          const weatherCode = time.getElementsByTagName("symbol")[0]?.getAttribute("var") || "";
+          const weatherIcon = `https://openweathermap.org/img/wn/${weatherCode}.png`;
+          const kelvin = parseFloat(time.getElementsByTagName("temperature")[0]?.getAttribute("value") || "0");
+        
+          const temperature = (kelvin - 273.15).toFixed(2);
+        
+          dataToItems.push({
+            dateStart,
+            dateEnd,
+            precipitation,
+            humidity,
+            clouds,
+            weatherIcon,
+            temperature, 
+          });
         }
-        return response.json();
-      })
-      .then((data: WeatherData) => setWeatherData(data))
-      .catch((err) => {
-        console.error(err);
-        setError(err.message);
-      });
-  }, []);
+        const now = new Date();
+        const currentTime = now.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+        const currentWeatherCode = times[0]?.getElementsByTagName("symbol")[0]?.getAttribute("var") || "";
+        const currentWeatherIcon = `https://openweathermap.org/img/wn/${currentWeatherCode}.png`;
+        const currentKelvin = parseFloat(times[0]?.getElementsByTagName("temperature")[0]?.getAttribute("value") || "0");
+        const currentTemperature = (currentKelvin - 273.15).toFixed(2);
+        console.log(currentWeatherIcon);
+        console.log(currentTemperature);
+        
+        const name = xml.getElementsByTagName("name")[0]?.textContent || "";
+        dataToIndicators.push({
+          title: "City",
+          value: name,
+          subtitle: `Current Time: ${currentTime}`,
+          icon: currentWeatherIcon,
+          temp: currentTemperature,
+        });
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+        const locationParent = xml.getElementsByTagName("location")[0];
+        if (locationParent) {
+          const locationElement = locationParent.getElementsByTagName("location")[0];
+          if (locationElement) {
+            const latitude = locationElement.getAttribute("latitude") || "";
+            const longitude = locationElement.getAttribute("longitude") || "";
+            const altitude = locationElement.getAttribute("altitude") || "";
 
-  if (!weatherData) {
-    return <div>Cargando...</div>;
-  }
+            dataToIndicators.push({ title: "Latitude", value: latitude });
+            dataToIndicators.push({ title: "Longitude",  value: longitude });
+            dataToIndicators.push({ title: "Altitude",  value: altitude });
+          }
+        }
 
-  const { city, list: forecast } = weatherData;
+        setIndicators(dataToIndicators);
+        setItems(dataToItems);
+      }
+    };
 
-  const hourlyForecast = forecast.slice(0, 8).map((item) => ({
-    time: new Date(item.dt * 1000).toLocaleTimeString('es-EC', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    temperature: item.main.temp,
-    description: item.weather[0].description,
-    icon: item.weather[0].icon,
-    windSpeed: item.wind.speed,
-  }));
+    request();
+  }, [owm]);
 
-  const chartData = {
-    labels: hourlyForecast.map((item) => item.time),
-    datasets: [
-      {
-        label: 'Temperatura (°C)',
-        data: hourlyForecast.map((item) => item.temperature),
-        borderColor: '#ff4500',
-        backgroundColor: 'rgba(255, 69, 0, 0.2)',
-        borderWidth: 2,
-        tension: 0.4,
-      },
-    ],
+  const handleVariableChange = (variable: string) => {
+    setSelectedVariable(variable);
   };
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: true,
-      },
-      title: {
-        display: false,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
+  const renderIndicators = () => {
+    return indicators.map((indicator, idx) => (
+      <Grid key={idx} item xs={12} xl={3} className="card">
+        <IndicatorWeather
+          title={indicator.title}
+          subtitle={indicator.subtitle}
+          value={indicator.value}
+          icon={indicator.icon}
+          temp={indicator.temp}
+        />
+      </Grid>
+    ));
   };
 
-  const dailyForecast = forecast.filter((_, index) => index % 8 === 0).slice(0, 7);
-
-  const currentDate = new Date().toLocaleString('es-EC', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const humidityData = items.map(item => Number(item.humidity));
+  const precipitationData = items.map(item => Number(item.precipitation));
+  const cloudsData = items.map(item => Number(item.clouds));
+  const timeLabels = items.map(item => item.dateStart); 
 
   return (
     <div className="weather-app">
-      <Grid container spacing={4} justifyContent="center" alignItems="center">
-        {/* Información actual */}
-        <Grid item xs={12} md={6}>
-          <Card className="current-weather">
-            <CardContent>
-              <Typography variant="h6" style={{ color: "#FF7C00" }}>{currentDate}</Typography>
-              <Typography variant="h4" style={{ color: "#333333" }}>{city.name}, {city.country}</Typography>
-              <div className="weather-current">
-                <img
-                  src={`https://openweathermap.org/img/wn/${hourlyForecast[0].icon}@4x.png`}
-                  alt={hourlyForecast[0].description}
-                  className="weather-icon"
-                />
-                <Typography variant="h3" className="temperature">
-                  {hourlyForecast[0].temperature}°C
-                </Typography>
-              </div>
-              <Typography variant="body1" className="description">
-                Feels like {forecast[0].main.feels_like}°C. {hourlyForecast[0].description}.
-              </Typography>
-              <div className="weather-details">
-                <Typography>Viento: {hourlyForecast[0].windSpeed} m/s</Typography>
-                <Typography>Humedad: {forecast[0].main.humidity}%</Typography>
-                <Typography>Presión: {forecast[0].main.pressure} hPa</Typography>
-                <Typography>Visibilidad: {forecast[0].visibility / 1000} km</Typography>
-              </div>
-            </CardContent>
-          </Card>
+      <h1>Weather Dashboard</h1>
+      <Grid container spacing={5}>
+        {renderIndicators()}
+
+        <Grid item xs={12} xl={9}>
+          <div className="table-container">
+            <TableWeather itemsIn={items} />
+          </div>
         </Grid>
-  
-        {/* Mapa */}
-        <Grid item xs={12} md={6}>
-          <Card className="map">
-            <CardContent>
-              <iframe
-                title="Mapa de Guayaquil"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=-80.05185%2C-2.31885%2C-79.65185%2C-2.06885&layer=mapnik`}
-                className="responsive-map"
-                allowFullScreen
-                loading="lazy"
+
+        <Grid item xs={12} xl={8}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} xl={3} className="control-weather">
+              <ControlWeather 
+                selectedVariable={selectedVariable} 
+                onVariableChange={handleVariableChange} 
               />
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-  
-      {/* Segunda fila: Pronóstico por horas y tabla de pronóstico extendido */}
-      <Grid container spacing={4} justifyContent="center" alignItems="center" style={{ marginTop: '2rem' }}>
-        {/* Pronóstico por horas */}
-        <Grid item xs={12} md={6}>
-          <Card className="hourly-forecast">
-            <CardContent>
-              <Typography variant="h6">Pronóstico por horas</Typography>
-              <Line data={chartData} options={chartOptions} />
-            </CardContent>
-          </Card>
-        </Grid>
-  
-        {/* Pronóstico extendido */}
-        <Grid item xs={12} md={6}>
-          <Card className="daily-forecast">
-            <CardContent>
-              <Typography variant="h6">Pronóstico extendido</Typography>
-              <Table>
-                <TableBody>
-                  {dailyForecast.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        {new Date(item.dt * 1000).toLocaleDateString('es-EC', {
-                          weekday: 'short',
-                          day: 'numeric',
-                          month: 'short',
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <img
-                          src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`}
-                          alt={item.weather[0].description}
-                          className="weather-icon"
-                        />
-                      </TableCell>
-                      <TableCell>{item.main.temp_max}°C / {item.main.temp_min}°C</TableCell>
-                      <TableCell>{item.weather[0].description}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+            </Grid>
+            <Grid item xs={12} xl={9}>
+              <div className="line-chart-container">
+                <LineChartWeather
+                  selectedVariable={selectedVariable}
+                  humidityData={humidityData}
+                  precipitationData={precipitationData}
+                  cloudsData={cloudsData}
+                  timeLabels={timeLabels}
+                />
+              </div>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </div>
   );
-  
-};
+}
 
 export default App;

@@ -1,111 +1,157 @@
+/* General Styles */
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
-  color: #333333;
+  background-color: #1c1c1e; /* Fondo negro suave */
+  color: #e0e0e0; /* Blanco suave */
   font-family: 'Roboto', sans-serif;
 }
 
+/* Weather App */
 .weather-app {
-  font-family: 'Roboto', sans-serif;
-  background-color: #ffffff;
-  color: #333333;
-  padding: 2rem;
-  min-height: 100vh; 
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
-  align-items: center; 
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #1c1c1e; /* Fondo */
 }
 
-.card {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-}
-
-.responsive-map {
-  width: 100%; 
-  border-radius: 10px;
-  border: none;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-@media screen and (min-width: 769px) {
-  .responsive-map {
-    width: 800px;
-    height: 400px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .responsive-map {
-    width: 500px;
-  }
-}
-
-.current-weather {
+.weather-app h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffa726; /* Naranja tenue */
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
-.current-weather .temperature {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #FF7C00;
+/* Table Styles */
+.table-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 2rem;
+  background-color: #2a2a2e; /* Fondo oscuro para la tabla */
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
 }
 
-.current-weather .description {
-  font-size: 1.2rem;
-  color: #777777;
-  margin-top: 0.5rem;
-}
-
-.current-weather .weather-details {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: #555555;
-}
-
-.hourly-forecast h6 {
-  color: #FF7C00;
-}
-
-.daily-forecast table {
+.table-container table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.daily-forecast td {
+/* Estilo para las celdas de encabezado (primera fila) */
+.table-container thead tr th {
+  background-color: #ffa726; /* Fondo naranja brillante */
+  color: #ffffff; /* Texto blanco */
+  padding: 12px;
+  font-size: 1rem;
   text-align: center;
+}
+
+/* Estilo para las celdas de la tabla (filas de datos) */
+.table-container tbody td {
+  background-color: #2a2a2e; /* Fondo negro suave */
+  color: #ffffff; /* Texto blanco */
+  padding: 12px;
+  text-align: center;
+}
+
+
+/* LineChart Styling */
+.line-chart-container {
+  background-color: #2a2a2e; /* Fondo oscuro */
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilo para el indicador de clima */
+.indicator {
+  background-color: #2a2a2e; /* Fondo oscuro para los indicadores */
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  color: #e0e0e0; /* Blanco suave */
+}
+
+.indicator-title {
+  color: #ffa726; /* Naranja suave */
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.indicator-subtitle {
+  color: #757575; /* Gris suave para subtítulos */
   font-size: 0.9rem;
 }
 
-.daily-forecast img {
-  width: 50px;
-  height: 50px;
+/* Control Weather Styles */
+.control-weather {
+  background-color: #2a2a2e; /* Fondo oscuro */
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.daily-forecast td {
-  border-bottom: 1px solid #FF7C00;
+.control-weather h3 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #ffa726; /* Naranja suave */
+  margin-bottom: 1.5rem;
 }
 
-.daily-forecast tr:hover {
-  background-color: #FF7C00;
-  color: #ffffff;
+.control-weather select {
+  background-color: #1c1c1e; /* Fondo oscuro para el select */
+  color: #e0e0e0; /* Blanco suave */
+  border: 1px solid #ffa726; /* Borde naranja suave */
+  padding: 0.5rem;
+  font-size: 1rem;
+  width: 100%;
+  border-radius: 5px;
 }
 
+.control-weather select:focus {
+  outline: none;
+  border-color: #ffa726; /* Borde naranja cuando está seleccionado */
+}
+
+.control-weather p {
+  font-size: 1rem;
+  color: #e0e0e0; /* Blanco suave */
+}
+
+/* Responsive Styles */
 @media screen and (max-width: 768px) {
-  .current-weather .temperature {
-    font-size: 2.5rem;
+  .weather-app h1 {
+    font-size: 2rem;
   }
 
-  .daily-forecast img {
-    width: 40px;
-    height: 40px;
+  .card {
+    width: 100%;
   }
 
-  .daily-forecast td {
-    font-size: 0.8rem;
+  .table-container th,
+  .table-container td {
+    font-size: 0.9rem;
+  }
+
+  .line-chart-container {
+    padding: 1rem;
+  }
+
+  .indicator {
+    padding: 1rem;
+  }
+
+  .control-weather {
+    padding: 1rem;
+  }
+
+  .control-weather select {
+    font-size: 0.9rem;
   }
 }
+
