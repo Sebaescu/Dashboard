@@ -39,7 +39,7 @@ export default function TableWeather({ itemsIn }: TableWeatherProps) {
               <TableCell align="right" sx={{ backgroundColor: '#2a2a2e', color: '#ffffff' }}>{row.humidity}</TableCell>
               <TableCell align="right" sx={{ backgroundColor: '#2a2a2e', color: '#ffffff' }}>{row.clouds}</TableCell>
               <TableCell align="right" sx={{ backgroundColor: '#2a2a2e', color: '#ffffff' }}>
-                <img src={row.weatherIcon} alt="Weather icon" width={30} />
+                <img src={row.weatherIcon as string} alt="Weather icon" width={30} />
               </TableCell>
             </TableRow>
           ))}
