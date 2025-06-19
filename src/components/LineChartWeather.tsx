@@ -15,10 +15,10 @@ export default function LineChartWeather({
   precipitationData,
   cloudsData,
   timeLabels,
-}: LineChartWeatherProps) {
+}: Readonly<LineChartWeatherProps>) {
   let data: number[] = [];
   let label: string = '';
-  let color: string = '#ffa726';
+  let color;
 
   switch (selectedVariable) {
     case 'precipitation':
