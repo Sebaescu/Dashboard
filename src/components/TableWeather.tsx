@@ -1,4 +1,3 @@
-// TableWeather.tsx
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -28,8 +27,8 @@ export default function TableWeather({ itemsIn }: TableWeatherProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {itemsIn.map((row, index) => (
-            <TableRow key={index}>
+          {itemsIn.map((row) => (
+            <TableRow key={row.dateStart}>
               <TableCell component="th" scope="row" sx={{ backgroundColor: '#2a2a2e', color: '#ffffff' }}>
                 {row.dateStart}
               </TableCell>
