@@ -126,17 +126,20 @@ function App() {
   };
 
   const renderIndicators = () => {
-    return indicators.map((indicator, idx) => (
-      <Grid key={idx} item xs={12} xl={3} className="card">
-        <IndicatorWeather
-          title={indicator.title}
-          subtitle={indicator.subtitle}
-          value={indicator.value}
-          icon={indicator.icon}
-          temp={indicator.temp}
-        />
-      </Grid>
-    ));
+    return indicators.map((indicator) => {
+      const key = indicator.title ?? indicator.value ?? JSON.stringify(indicator);
+      return (
+        <Grid key={key} item xs={12} xl={3} className="card">
+          <IndicatorWeather
+            title={indicator.title}
+            subtitle={indicator.subtitle}
+            value={indicator.value}
+            icon={indicator.icon}
+            temp={indicator.temp}
+          />
+        </Grid>
+      );
+    });
   };
 
   const humidityData = items.map(item => Number(item.humidity));
